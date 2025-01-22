@@ -1,0 +1,59 @@
+# CMake version
+cmake_minimum_required(VERSION 3.10)
+
+# Project Name
+project(CLI_Encoder)
+
+# Set C++ version and enforce it
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Create compile_commands.json for Clang-Tidy
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Add all files to SOURCES variable 
+file(GLOB_RECURSE SOURCES src/*.cpp)
+
+# Add source files to a library
+add_library(encoder_core ${SOURCES})
+target_include_directories(encoder_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+# Ensure Clang-Tidy lints the encoder_core for modern practices, core guidelines, performance, and readability
+set_target_properties(encoder_core PROPERTIES CXX_CLANG_TIDY "clang-tidy;-checks=cppcoreguidelines-*,modernize-*,performance-*,readability-*")
+
+# Create the encoder executable
+add_executable(encoder src/main.cpp)
+target_link_libraries(encoder encoder_core)
+
+# Download and include Google Test
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE  # Set this to TRUE to avoid the warning
+)
+FetchContent_MakeAvailable(googletest)
+
+# Enable Testing
+enable_testing()
+
+# Add test source files
+file(GLOB_RECURSE TEST_SOURCES tests/*.cpp)
+
+# Add 'encoder_tests' executable and link it to GoogleTest
+add_executable(encoder_tests ${TEST_SOURCES} )
+target_link_libraries(encoder_tests GTest::gtest_main encoder_core)
+
+# Include source header files in encoder_tests
+target_include_directories(encoder_tests PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+# Ensure Clang-Tidy lints the assembler_tests for modern practices, core guidelines, performance, and readability
+set_target_properties(encoder_tests PROPERTIES CXX_CLANG_TIDY "clang-tidy;-checks=cppcoreguidelines-*,modernize-*,performance-*,readability-*")
+
+# Allow CMake's test runner to discover tests using GoogleTests CMake module
+include(GoogleTest)
+gtest_discover_tests(encoder_tests)
+
+# Max out warnings
+target_compile_options(encoder PRIVATE -Wall -Wextra -Wpedantic -Werror)
+target_compile_options(encoder_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
