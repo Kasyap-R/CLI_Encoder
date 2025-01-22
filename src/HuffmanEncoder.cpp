@@ -35,7 +35,8 @@ void HuffmanEncoder::generateCodes() {
 void HuffmanEncoder::generateCodesHelper(Node *currNode,
                                          std::string &currCode) {
     if (!currNode->left && !currNode->right) {
-        this->codes[currNode->symbol] = currCode;
+        this->charToCode[currNode->symbol] = currCode;
+        this->codeToChar[currCode] = currNode->symbol;
     }
 
     if (currNode->left) {
@@ -63,6 +64,29 @@ void HuffmanEncoder::mergeNodes() {
                                          std::move(nodeTwo)));
 }
 
-auto HuffmanEncoder::encode() -> std::string { return ""; }
+auto HuffmanEncoder::encode() -> std::string {
+    std::string encodedText;
+    encodedText.reserve(this->text.size() *
+                        3); // 3 is a heuristic for average code length
+    for (auto &symbol : this->text) {
+        encodedText += this->charToCode[symbol];
+    }
 
-auto HuffmanEncoder::decode() -> std::string { return ""; }
+    return encodedText;
+}
+
+// TODO: Add error checking (i.e. if currCode exceeds the length of the largest
+// code, return an error)
+auto HuffmanEncoder::decode(std::string encodedText) -> std::string {
+    std::string currCode;
+    std::string decodedText;
+    for (auto &symbol : encodedText) {
+        currCode += symbol;
+        if (this->codeToChar.find(currCode) != this->codeToChar.end()) {
+            decodedText += this->codeToChar[currCode];
+            currCode = "";
+        }
+    }
+
+    return decodedText;
+}

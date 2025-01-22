@@ -13,7 +13,8 @@ class HuffmanEncoder {
         pq;
     const std::string text;
     std::unordered_map<char, int> freqMap;
-    std::unordered_map<char, std::string> codes;
+    std::unordered_map<char, std::string> charToCode;
+    std::unordered_map<std::string, char> codeToChar;
 
     void calculateFrequencies();
 
@@ -30,5 +31,5 @@ class HuffmanEncoder {
 
     auto encode() -> std::string;
 
-    auto decode() -> std::string;
+    auto decode(std::string encodedText) -> std::string;
 };
