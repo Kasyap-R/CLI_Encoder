@@ -1,4 +1,5 @@
 #include "HuffmanEncoder.h"
+#include "util.h"
 #include <stdexcept>
 
 HuffmanEncoder::HuffmanEncoder(std::string text) : text(std::move(text)) {
